@@ -11,13 +11,13 @@ const generateAccessAndRefreshTokens =  async(userId) => {
         const refreshToken = user.generateRefreshToken()
 
         user.refreshToken = refreshToken
-        await user.save({ validateBeforeSave })
+        await user.save({ validateBeforeSave: false })
 
         return {accessToken, refreshToken}
 
 
     } catch (error) {
-        throw new ApiError(500,"")
+        throw new ApiError(500,"Something went wrong while generating access and refresh token.")
     }
 }
 
@@ -103,7 +103,7 @@ const loginUser = asyncHandler( async (req, res)=>{
 
     const {username, email, password} = req.body
 
-    if (!username || email){
+    if (!(username || email)){
         throw new ApiError(400, "Username or email is required")
     }
 
@@ -151,8 +151,8 @@ const logoutUser = asyncHandler( async (req, res) =>{
     await User.findByIdAndUpdate(
         req.user._id,
         {
-            $set: {
-                refreshToken: undefined
+            $unset: {
+                refreshToken: 1
             }
         },
         {
@@ -167,8 +167,8 @@ const logoutUser = asyncHandler( async (req, res) =>{
 
     return res
     .status(200)
-    .cookie("refreshToken", options)
-    .cookie("accessToken", options)
+    .clearcookie("refreshToken", options)
+    .clearcookie("accessToken", options)
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
