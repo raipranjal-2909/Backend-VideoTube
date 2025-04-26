@@ -174,7 +174,7 @@ const logoutUser = asyncHandler( async (req, res) =>{
     .json(new ApiResponse(200, {}, "User logged Out"))
 })
 
-const refreshAccesToken = asyncHandler( async (req, res) =>{
+const refreshAccesToken = asyncHandler( async (req, res) =>{ 
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
 
     if(!incomingRefreshToken){
@@ -207,7 +207,7 @@ const refreshAccesToken = asyncHandler( async (req, res) =>{
         return res
         .status(200)
         .cookie("accessToken", accessToken, options)
-        .cookie("refrehToken", newrefreshToken, options)
+        .cookie("refreshToken", newrefreshToken, options)
         .json(
             new ApiResponse(
                 200,
@@ -357,10 +357,10 @@ const getUserChannelProfile = asyncHandler(async(req,res) =>{
         {
             $addFields:{
                 subcribersCount:{
-                    $size : "subscribers"
+                    $size : "$subscribers"
                 },
                 channelSubscribedToCount: {
-                    $size : "subscribedTo"
+                    $size : "$subscribedTo"
                 },
                 isSubscribed: {
                     $cond: {
@@ -387,13 +387,13 @@ const getUserChannelProfile = asyncHandler(async(req,res) =>{
     ])
     console.log(channel)
 
-    if(channel?.length){
+    if(!channel?.length){
         throw new ApiError(404, "channel does not exists")
     }
 
     return res
     .status(200)
-    .json(200, channel[0], "User fetched successfully")
+    .json(new ApiResponse(200, channel[0], "User fetched successfully"))
 })
 
 const getWatchHistory = asyncHandler( async( req, res) =>{
